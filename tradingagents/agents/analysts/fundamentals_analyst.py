@@ -10,7 +10,9 @@ def create_fundamentals_analyst(llm, toolkit):
         company_name = state["company_of_interest"]
 
         if toolkit.config["online_tools"]:
-            tools = [toolkit.get_fundamentals_openai]
+            # tools = [toolkit.get_fundamentals_openai]
+            tools = [toolkit.get_finnhub_company_insider_sentiment,
+            toolkit.get_finnhub_company_insider_transactions]
         else:
             tools = [
                 toolkit.get_finnhub_company_insider_sentiment,
@@ -21,22 +23,14 @@ def create_fundamentals_analyst(llm, toolkit):
             ]
 
         system_message = (
-            "You are a researcher tasked with analyzing fundamental information over the past week about a company. Please write a comprehensive report of the company's fundamental information such as financial documents, company profile, basic company financials, company financial history, insider sentiment and insider transactions to gain a full view of the company's fundamental information to inform traders. Make sure to include as much detail as possible. Do not simply state the trends are mixed, provide detailed and finegrained analysis and insights that may help traders make decisions."
-            + " Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read.",
+            "你是一名研究员，负责分析公司过去一周的基本面信息。请撰写一份全面的公司基本面报告，包括财务报表、公司简介、基础财务数据、财务历史、内部人情绪和交易等，帮助交易者全面了解公司基本面。请尽量详细，不要简单说趋势混合，要有助于交易决策的深度洞察。最后请附上Markdown表格，梳理报告要点，便于阅读。"
         )
 
         prompt = ChatPromptTemplate.from_messages(
             [
                 (
                     "system",
-                    "You are a helpful AI assistant, collaborating with other assistants."
-                    " Use the provided tools to progress towards answering the question."
-                    " If you are unable to fully answer, that's OK; another assistant with different tools"
-                    " will help where you left off. Execute what you can to make progress."
-                    " If you or any other assistant has the FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** or deliverable,"
-                    " prefix your response with FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** so the team knows to stop."
-                    " You have access to the following tools: {tool_names}.\n{system_message}"
-                    "For your reference, the current date is {current_date}. The company we want to look at is {ticker}",
+                    "你是一个乐于协作的AI助手，与其他助手协同工作。可选择使用提供的工具推进问题的解答。如果你无法完全解答，没关系，其他助手会接力。请执行你能完成的部分。如果你或其他助手得出了最终建议（最终建议：**买入/持有/卖出**），请在回复前缀标明，团队即可停止。你可用的工具有：{tool_names}。\n{system_message}参考日期：{current_date}，公司：{ticker}"
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]

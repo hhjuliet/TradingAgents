@@ -20,7 +20,8 @@
   <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ko">한국어</a> | 
   <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=pt">Português</a> | 
   <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ru">Русский</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=zh">中文</a>
+  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=zh">中文</a> |
+  <a href="./README_CN.md">简体中文（本地）</a>
 </div>
 
 ---
@@ -158,7 +159,7 @@ To use TradingAgents inside your code, you can import the `tradingagents` module
 
 ```python
 from tradingagents.graph.trading_graph import TradingAgentsGraph
-from tradingagents.default_config import DEFAULT_CONFIG
+from tradingagents.dashscope_default_config import DEFAULT_CONFIG
 
 ta = TradingAgentsGraph(debug=True, config=DEFAULT_CONFIG.copy())
 
@@ -171,14 +172,14 @@ You can also adjust the default configuration to set your own choice of LLMs, de
 
 ```python
 from tradingagents.graph.trading_graph import TradingAgentsGraph
-from tradingagents.default_config import DEFAULT_CONFIG
+from tradingagents.dashscope_default_config import DEFAULT_CONFIG
 
 # Create a custom config
 config = DEFAULT_CONFIG.copy()
 config["deep_think_llm"] = "gpt-4.1-nano"  # Use a different model
 config["quick_think_llm"] = "gpt-4.1-nano"  # Use a different model
 config["max_debate_rounds"] = 1  # Increase debate rounds
-config["online_tools"] = True # Use online tools or cached data
+config["online_tools"] = True  # Use online tools or cached data
 
 # Initialize with custom config
 ta = TradingAgentsGraph(debug=True, config=config)

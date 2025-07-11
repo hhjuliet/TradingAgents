@@ -19,19 +19,18 @@ def create_safe_debator(llm):
 
         trader_decision = state["trader_investment_plan"]
 
-        prompt = f"""As the Safe/Conservative Risk Analyst, your primary objective is to protect assets, minimize volatility, and ensure steady, reliable growth. You prioritize stability, security, and risk mitigation, carefully assessing potential losses, economic downturns, and market volatility. When evaluating the trader's decision or plan, critically examine high-risk elements, pointing out where the decision may expose the firm to undue risk and where more cautious alternatives could secure long-term gains. Here is the trader's decision:
+        prompt = f"""你是一名保守型风险分析师，首要目标是保护资产、降低波动、确保稳定增长。你优先考虑稳定、安全和风险规避，仔细评估潜在损失、经济下行和市场波动。评估交易员决策时，重点指出高风险环节，说明哪些地方可能带来过度风险，哪些更保守的方案能保障长期收益。以下是交易员决策：
 
 {trader_decision}
 
-Your task is to actively counter the arguments of the Risky and Neutral Analysts, highlighting where their views may overlook potential threats or fail to prioritize sustainability. Respond directly to their points, drawing from the following data sources to build a convincing case for a low-risk approach adjustment to the trader's decision:
+你的任务是积极反驳激进和中立分析师的观点，指出他们可能忽视的风险或未优先考虑可持续性。请直接回应他们的观点，结合以下数据源，论证低风险调整方案的合理性：
 
-Market Research Report: {market_research_report}
-Social Media Sentiment Report: {sentiment_report}
-Latest World Affairs Report: {news_report}
-Company Fundamentals Report: {fundamentals_report}
-Here is the current conversation history: {history} Here is the last response from the risky analyst: {current_risky_response} Here is the last response from the neutral analyst: {current_neutral_response}. If there are no responses from the other viewpoints, do not halluncinate and just present your point.
-
-Engage by questioning their optimism and emphasizing the potential downsides they may have overlooked. Address each of their counterpoints to showcase why a conservative stance is ultimately the safest path for the firm's assets. Focus on debating and critiquing their arguments to demonstrate the strength of a low-risk strategy over their approaches. Output conversationally as if you are speaking without any special formatting."""
+市场研究报告: {market_research_report}
+社交媒体情绪报告: {sentiment_report}
+最新世界新闻: {news_report}
+公司基本面报告: {fundamentals_report}
+当前辩论历史: {history} 激进分析师最新观点: {current_risky_response}
+"""
 
         response = llm.invoke(prompt)
 
@@ -39,17 +38,13 @@ Engage by questioning their optimism and emphasizing the potential downsides the
 
         new_risk_debate_state = {
             "history": history + "\n" + argument,
-            "risky_history": risk_debate_state.get("risky_history", ""),
             "safe_history": safe_history + "\n" + argument,
+            "risky_history": risk_debate_state.get("risky_history", ""),
             "neutral_history": risk_debate_state.get("neutral_history", ""),
             "latest_speaker": "Safe",
-            "current_risky_response": risk_debate_state.get(
-                "current_risky_response", ""
-            ),
             "current_safe_response": argument,
-            "current_neutral_response": risk_debate_state.get(
-                "current_neutral_response", ""
-            ),
+            "current_risky_response": risk_debate_state.get("current_risky_response", ""),
+            "current_neutral_response": risk_debate_state.get("current_neutral_response", ""),
             "count": risk_debate_state["count"] + 1,
         }
 

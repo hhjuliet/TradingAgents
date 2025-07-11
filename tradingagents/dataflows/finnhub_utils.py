@@ -4,13 +4,13 @@ import os
 
 def get_data_in_range(ticker, start_date, end_date, data_type, data_dir, period=None):
     """
-    Gets finnhub data saved and processed on disk.
-    Args:
-        start_date (str): Start date in YYYY-MM-DD format.
-        end_date (str): End date in YYYY-MM-DD format.
-        data_type (str): Type of data from finnhub to fetch. Can be insider_trans, SEC_filings, news_data, insider_senti, or fin_as_reported.
-        data_dir (str): Directory where the data is saved.
-        period (str): Default to none, if there is a period specified, should be annual or quarterly.
+    获取已保存并处理在磁盘上的finnhub数据。
+    参数：
+        start_date (str): 起始日期，格式为YYYY-MM-DD。
+        end_date (str): 结束日期，格式为YYYY-MM-DD。
+        data_type (str): 要获取的finnhub数据类型。可选值：insider_trans、SEC_filings、news_data、insider_senti、fin_as_reported。
+        data_dir (str): 数据保存的目录。
+        period (str): 默认为None，如指定则为年度annual或季度quarterly。
     """
 
     if period:
@@ -28,7 +28,7 @@ def get_data_in_range(ticker, start_date, end_date, data_type, data_dir, period=
     data = open(data_path, "r")
     data = json.load(data)
 
-    # filter keys (date, str in format YYYY-MM-DD) by the date range (str, str in format YYYY-MM-DD)
+    # 按日期范围过滤键（日期格式为YYYY-MM-DD的字符串）
     filtered_data = {}
     for key, value in data.items():
         if start_date <= key <= end_date and len(value) > 0:

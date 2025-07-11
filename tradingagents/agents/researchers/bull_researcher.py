@@ -22,24 +22,24 @@ def create_bull_researcher(llm, memory):
         for i, rec in enumerate(past_memories, 1):
             past_memory_str += rec["recommendation"] + "\n\n"
 
-        prompt = f"""You are a Bull Analyst advocating for investing in the stock. Your task is to build a strong, evidence-based case emphasizing growth potential, competitive advantages, and positive market indicators. Leverage the provided research and data to address concerns and counter bearish arguments effectively.
+        prompt = f"""你是一名多头分析师，负责为该股票的投资建言。你的任务是基于证据，强调增长潜力、竞争优势和积极市场信号。请利用所给研究和数据，回应并反驳空头观点。
 
-Key points to focus on:
-- Growth Potential: Highlight the company's market opportunities, revenue projections, and scalability.
-- Competitive Advantages: Emphasize factors like unique products, strong branding, or dominant market positioning.
-- Positive Indicators: Use financial health, industry trends, and recent positive news as evidence.
-- Bear Counterpoints: Critically analyze the bear argument with specific data and sound reasoning, addressing concerns thoroughly and showing why the bull perspective holds stronger merit.
-- Engagement: Present your argument in a conversational style, engaging directly with the bear analyst's points and debating effectively rather than just listing data.
+重点关注：
+- 增长潜力：突出公司市场机会、营收预期和可扩展性。
+- 竞争优势：强调独特产品、强大品牌或主导地位。
+- 积极信号：用财务健康、行业趋势和最新利好新闻佐证。
+- 空头反驳：用具体数据和严密推理回应空头观点，说明多头立场更有说服力。
+- 互动性：以对话方式直接回应空头观点，展开有效辩论，而非仅罗列数据。
 
-Resources available:
-Market research report: {market_research_report}
-Social media sentiment report: {sentiment_report}
-Latest world affairs news: {news_report}
-Company fundamentals report: {fundamentals_report}
-Conversation history of the debate: {history}
-Last bear argument: {current_response}
-Reflections from similar situations and lessons learned: {past_memory_str}
-Use this information to deliver a compelling bull argument, refute the bear's concerns, and engage in a dynamic debate that demonstrates the strengths of the bull position. You must also address reflections and learn from lessons and mistakes you made in the past.
+可用资源：
+市场研究报告: {market_research_report}
+社交媒体情绪报告: {sentiment_report}
+最新世界新闻: {news_report}
+公司基本面报告: {fundamentals_report}
+辩论历史: {history}
+上一次空头观点: {current_response}
+类似情形的反思与经验: {past_memory_str}
+请用这些信息给出有说服力的多头论据，反驳空头担忧，展开动态辩论，展现多头立场优势。你还需结合过往经验和教训。
 """
 
         response = llm.invoke(prompt)

@@ -9,20 +9,20 @@ from .config import get_config
 class StockstatsUtils:
     @staticmethod
     def get_stock_stats(
-        symbol: Annotated[str, "ticker symbol for the company"],
+        symbol: Annotated[str, "公司股票代码"],
         indicator: Annotated[
-            str, "quantitative indicators based off of the stock data for the company"
+            str, "基于公司股票数据的量化指标"
         ],
         curr_date: Annotated[
-            str, "curr date for retrieving stock price data, YYYY-mm-dd"
+            str, "获取股票价格数据的日期，YYYY-mm-dd"
         ],
         data_dir: Annotated[
             str,
-            "directory where the stock data is stored.",
+            "股票数据存储目录。",
         ],
         online: Annotated[
             bool,
-            "whether to use online tools to fetch data or offline tools. If True, will use online tools.",
+            "是否使用在线工具获取数据。如果为True，则使用在线工具。",
         ] = False,
     ):
         df = None
@@ -38,9 +38,9 @@ class StockstatsUtils:
                 )
                 df = wrap(data)
             except FileNotFoundError:
-                raise Exception("Stockstats fail: Yahoo Finance data not fetched yet!")
+                raise Exception("Stockstats错误：尚未获取Yahoo Finance数据！")
         else:
-            # Get today's date as YYYY-mm-dd to add to cache
+            # 获取今天日期（YYYY-mm-dd），用于缓存
             today_date = pd.Timestamp.today()
             curr_date = pd.to_datetime(curr_date)
 
@@ -49,7 +49,7 @@ class StockstatsUtils:
             start_date = start_date.strftime("%Y-%m-%d")
             end_date = end_date.strftime("%Y-%m-%d")
 
-            # Get config and ensure cache directory exists
+            # 获取配置并确保缓存目录存在
             config = get_config()
             os.makedirs(config["data_cache_dir"], exist_ok=True)
 
@@ -77,11 +77,11 @@ class StockstatsUtils:
             df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
             curr_date = curr_date.strftime("%Y-%m-%d")
 
-        df[indicator]  # trigger stockstats to calculate the indicator
+        df[indicator]  # 触发stockstats计算指标
         matching_rows = df[df["Date"].str.startswith(curr_date)]
 
         if not matching_rows.empty:
             indicator_value = matching_rows[indicator].values[0]
             return indicator_value
         else:
-            return "N/A: Not a trading day (weekend or holiday)"
+            return "N/A：非交易日（周末或节假日）"

@@ -4,7 +4,7 @@ import json
 
 
 def create_trader(llm, memory):
-    def trader_node(state, name):
+    def trader_node(state):
         company_name = state["company_of_interest"]
         investment_plan = state["investment_plan"]
         market_research_report = state["market_report"]
@@ -21,13 +21,13 @@ def create_trader(llm, memory):
 
         context = {
             "role": "user",
-            "content": f"Based on a comprehensive analysis by a team of analysts, here is an investment plan tailored for {company_name}. This plan incorporates insights from current technical market trends, macroeconomic indicators, and social media sentiment. Use this plan as a foundation for evaluating your next trading decision.\n\nProposed Investment Plan: {investment_plan}\n\nLeverage these insights to make an informed and strategic decision.",
+            "content": f"基于分析师团队的综合分析，以下是为{company_name}量身定制的投资计划。该计划融合了当前技术面、宏观经济和社交媒体情绪的洞察。请以此为基础，评估你的下一个交易决策。\n\n建议投资计划: {investment_plan}\n\n请利用这些洞察做出明智且有策略的决策。",
         }
 
         messages = [
             {
                 "role": "system",
-                "content": f"""You are a trading agent analyzing market data to make investment decisions. Based on your analysis, provide a specific recommendation to buy, sell, or hold. End with a firm decision and always conclude your response with 'FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL**' to confirm your recommendation. Do not forget to utilize lessons from past decisions to learn from your mistakes. Here is some reflections from similar situatiosn you traded in and the lessons learned: {past_memory_str}""",
+                "content": f"你是一名交易代理，分析市场数据做出投资决策。请基于你的分析，给出明确的买入、卖出或持有建议。最后务必以'最终建议：**买入/持有/卖出**'结尾，确认你的建议。不要忘记结合过往决策的经验教训。以下是你在类似情形下的反思与经验：{past_memory_str}",
             },
             context,
         ]
@@ -37,7 +37,6 @@ def create_trader(llm, memory):
         return {
             "messages": [result],
             "trader_investment_plan": result.content,
-            "sender": name,
         }
 
-    return functools.partial(trader_node, name="Trader")
+    return trader_node

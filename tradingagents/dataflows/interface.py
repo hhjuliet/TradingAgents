@@ -19,21 +19,20 @@ from .config import get_config, set_config, DATA_DIR
 def get_finnhub_news(
     ticker: Annotated[
         str,
-        "Search query of a company's, e.g. 'AAPL, TSM, etc.",
+        "公司查询关键词，例如 'AAPL, TSM, 等'",
     ],
-    curr_date: Annotated[str, "Current date in yyyy-mm-dd format"],
-    look_back_days: Annotated[int, "how many days to look back"],
+    curr_date: Annotated[str, "当前日期，格式为yyyy-mm-dd"],
+    look_back_days: Annotated[int, "回溯天数"],
 ):
     """
-    Retrieve news about a company within a time frame
+    获取公司在指定时间段内的新闻
 
-    Args
-        ticker (str): ticker for the company you are interested in
-        start_date (str): Start date in yyyy-mm-dd format
-        end_date (str): End date in yyyy-mm-dd format
-    Returns
-        str: dataframe containing the news of the company in the time frame
-
+    参数：
+        ticker (str): 感兴趣公司的股票代码
+        start_date (str): 起始日期，格式yyyy-mm-dd
+        end_date (str): 结束日期，格式yyyy-mm-dd
+    返回：
+        str: 指定时间段内公司的新闻内容
     """
 
     start_date = datetime.strptime(curr_date, "%Y-%m-%d")
@@ -51,11 +50,11 @@ def get_finnhub_news(
             continue
         for entry in data:
             current_news = (
-                "### " + entry["headline"] + f" ({day})" + "\n" + entry["summary"]
+                "### " + entry["headline"] + f"（{day}）" + "\n" + entry["summary"]
             )
             combined_result += current_news + "\n\n"
 
-    return f"## {ticker} News, from {before} to {curr_date}:\n" + str(combined_result)
+    return f"## {ticker} 新闻，时间段：{before} 至 {curr_date}：\n" + str(combined_result)
 
 
 def get_finnhub_company_insider_sentiment(
@@ -67,12 +66,12 @@ def get_finnhub_company_insider_sentiment(
     look_back_days: Annotated[int, "number of days to look back"],
 ):
     """
-    Retrieve insider sentiment about a company (retrieved from public SEC information) for the past 15 days
-    Args:
-        ticker (str): ticker symbol of the company
-        curr_date (str): current date you are trading on, yyyy-mm-dd
-    Returns:
-        str: a report of the sentiment in the past 15 days starting at curr_date
+    获取公司内幕消息（从公共SEC信息中获取）过去15天
+    参数：
+        ticker (str): 公司股票代码
+        curr_date (str): 当前交易日期，yyyy-mm-dd
+    返回：
+        str: 从curr_date开始的过去15天的内幕消息报告
     """
 
     date_obj = datetime.strptime(curr_date, "%Y-%m-%d")
@@ -93,9 +92,9 @@ def get_finnhub_company_insider_sentiment(
                 seen_dicts.append(entry)
 
     return (
-        f"## {ticker} Insider Sentiment Data for {before} to {curr_date}:\n"
+        f"## {ticker} 内幕消息数据，时间段：{before} 至 {curr_date}：\n"
         + result_str
-        + "The change field refers to the net buying/selling from all insiders' transactions. The mspr field refers to monthly share purchase ratio."
+        + "change字段表示所有内幕交易的变化。mspr字段表示月度持股比例。"
     )
 
 
@@ -108,12 +107,12 @@ def get_finnhub_company_insider_transactions(
     look_back_days: Annotated[int, "how many days to look back"],
 ):
     """
-    Retrieve insider transcaction information about a company (retrieved from public SEC information) for the past 15 days
-    Args:
-        ticker (str): ticker symbol of the company
-        curr_date (str): current date you are trading at, yyyy-mm-dd
-    Returns:
-        str: a report of the company's insider transaction/trading informtaion in the past 15 days
+    获取公司内幕交易信息（从公共SEC信息中获取）过去15天
+    参数：
+        ticker (str): 公司股票代码
+        curr_date (str): 当前交易日期，yyyy-mm-dd
+    返回：
+        str: 公司过去15天的内幕交易/交易信息报告
     """
 
     date_obj = datetime.strptime(curr_date, "%Y-%m-%d")
@@ -135,9 +134,9 @@ def get_finnhub_company_insider_transactions(
                 seen_dicts.append(entry)
 
     return (
-        f"## {ticker} insider transactions from {before} to {curr_date}:\n"
+        f"## {ticker} 内幕交易，时间段：{before} 至 {curr_date}：\n"
         + result_str
-        + "The change field reflects the variation in share count—here a negative number indicates a reduction in holdings—while share specifies the total number of shares involved. The transactionPrice denotes the per-share price at which the trade was executed, and transactionDate marks when the transaction occurred. The name field identifies the insider making the trade, and transactionCode (e.g., S for sale) clarifies the nature of the transaction. FilingDate records when the transaction was officially reported, and the unique id links to the specific SEC filing, as indicated by the source. Additionally, the symbol ties the transaction to a particular company, isDerivative flags whether the trade involves derivative securities, and currency notes the currency context of the transaction."
+        + "change字段反映持股数量的变化——负数表示持股减少，share表示涉及的总股数。transactionPrice表示交易执行的每股价格，transactionDate表示交易发生的时间。name字段标识交易者，transactionCode（例如，S表示出售）说明交易性质。FilingDate记录交易正式报告的时间，unique id链接到特定的SEC文件，source中指示。此外，symbol将交易与特定公司关联，isDerivative表示交易涉及衍生证券，currency表示交易货币环境。"
     )
 
 
@@ -182,9 +181,9 @@ def get_simfin_balance_sheet(
     latest_balance_sheet = latest_balance_sheet.drop("SimFinId")
 
     return (
-        f"## {freq} balance sheet for {ticker} released on {str(latest_balance_sheet['Publish Date'])[0:10]}: \n"
+        f"## {freq} 资产负债表，{ticker} 发布于 {str(latest_balance_sheet['Publish Date'])[0:10]}：\n"
         + str(latest_balance_sheet)
-        + "\n\nThis includes metadata like reporting dates and currency, share details, and a breakdown of assets, liabilities, and equity. Assets are grouped as current (liquid items like cash and receivables) and noncurrent (long-term investments and property). Liabilities are split between short-term obligations and long-term debts, while equity reflects shareholder funds such as paid-in capital and retained earnings. Together, these components ensure that total assets equal the sum of liabilities and equity."
+        + "\n\n这包括报告日期和货币、股本详情以及资产、负债和所有者权益的明细。资产分为流动资产（如现金和应收账款）和非流动资产（长期投资和固定资产）。负债分为流动负债和长期负债，所有者权益反映股东资金，包括已缴资本和留存收益。这些组成部分确保总资产等于负债和所有者权益之和。"
     )
 
 
@@ -229,9 +228,9 @@ def get_simfin_cashflow(
     latest_cash_flow = latest_cash_flow.drop("SimFinId")
 
     return (
-        f"## {freq} cash flow statement for {ticker} released on {str(latest_cash_flow['Publish Date'])[0:10]}: \n"
+        f"## {freq} 现金流量表，{ticker} 发布于 {str(latest_cash_flow['Publish Date'])[0:10]}：\n"
         + str(latest_cash_flow)
-        + "\n\nThis includes metadata like reporting dates and currency, share details, and a breakdown of cash movements. Operating activities show cash generated from core business operations, including net income adjustments for non-cash items and working capital changes. Investing activities cover asset acquisitions/disposals and investments. Financing activities include debt transactions, equity issuances/repurchases, and dividend payments. The net change in cash represents the overall increase or decrease in the company's cash position during the reporting period."
+        + "\n\n这包括报告日期和货币、股本详情以及现金流动的明细。经营活动显示来自核心业务运营的现金，包括非现金项目和营运资本变化的净收入调整。投资活动包括资产收购/处置和投资。融资活动包括债务交易、股权发行/回购和股息支付。现金净额代表报告期内公司现金头寸的整体增加或减少。"
     )
 
 
@@ -276,9 +275,9 @@ def get_simfin_income_statements(
     latest_income = latest_income.drop("SimFinId")
 
     return (
-        f"## {freq} income statement for {ticker} released on {str(latest_income['Publish Date'])[0:10]}: \n"
+        f"## {freq} 利润表，{ticker} 发布于 {str(latest_income['Publish Date'])[0:10]}：\n"
         + str(latest_income)
-        + "\n\nThis includes metadata like reporting dates and currency, share details, and a comprehensive breakdown of the company's financial performance. Starting with Revenue, it shows Cost of Revenue and resulting Gross Profit. Operating Expenses are detailed, including SG&A, R&D, and Depreciation. The statement then shows Operating Income, followed by non-operating items and Interest Expense, leading to Pretax Income. After accounting for Income Tax and any Extraordinary items, it concludes with Net Income, representing the company's bottom-line profit or loss for the period."
+        + "\n\n这包括报告日期和货币、股本详情以及公司财务表现的全面明细。从收入开始，显示收入、成本和毛利。运营费用详细，包括SG&A、R&D和折旧。然后显示营业利润，接着是非营业项目和利息费用，导致税前利润。在扣除所得税和任何非常规项目后，它以净收入结束，代表报告期内的公司净利润或亏损。"
     )
 
 
@@ -305,7 +304,7 @@ def get_google_news(
     if len(news_results) == 0:
         return ""
 
-    return f"## {query} Google News, from {before} to {curr_date}:\n\n{news_str}"
+    return f"## {query} 谷歌新闻，时间段：{before} 至 {curr_date}：\n\n{news_str}"
 
 
 def get_reddit_global_news(
@@ -314,12 +313,12 @@ def get_reddit_global_news(
     max_limit_per_day: Annotated[int, "Maximum number of news per day"],
 ) -> str:
     """
-    Retrieve the latest top reddit news
-    Args:
-        start_date: Start date in yyyy-mm-dd format
-        end_date: End date in yyyy-mm-dd format
-    Returns:
-        str: A formatted dataframe containing the latest news articles posts on reddit and meta information in these columns: "created_utc", "id", "title", "selftext", "score", "num_comments", "url"
+    获取最新的reddit新闻
+    参数：
+        start_date: 起始日期，格式yyyy-mm-dd
+        end_date: 结束日期，格式yyyy-mm-dd
+    返回：
+        str: 包含最新新闻文章帖子、元信息和meta信息的格式化数据框，包含列："created_utc", "id", "title", "selftext", "score", "num_comments", "url"
     """
 
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
@@ -357,7 +356,7 @@ def get_reddit_global_news(
         else:
             news_str += f"### {post['title']}\n\n{post['content']}\n\n"
 
-    return f"## Global News Reddit, from {before} to {curr_date}:\n{news_str}"
+    return f"## 全球新闻Reddit，时间段：{before} 至 {curr_date}：\n{news_str}"
 
 
 def get_reddit_company_news(
@@ -367,13 +366,13 @@ def get_reddit_company_news(
     max_limit_per_day: Annotated[int, "Maximum number of news per day"],
 ) -> str:
     """
-    Retrieve the latest top reddit news
-    Args:
-        ticker: ticker symbol of the company
-        start_date: Start date in yyyy-mm-dd format
-        end_date: End date in yyyy-mm-dd format
-    Returns:
-        str: A formatted dataframe containing the latest news articles posts on reddit and meta information in these columns: "created_utc", "id", "title", "selftext", "score", "num_comments", "url"
+    获取最新的reddit新闻
+    参数：
+        ticker: 公司股票代码
+        start_date: 起始日期，格式yyyy-mm-dd
+        end_date: 结束日期，格式yyyy-mm-dd
+    返回：
+        str: 包含最新新闻文章帖子、元信息和meta信息的格式化数据框，包含列："created_utc", "id", "title", "selftext", "score", "num_comments", "url"
     """
 
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
@@ -416,7 +415,7 @@ def get_reddit_company_news(
         else:
             news_str += f"### {post['title']}\n\n{post['content']}\n\n"
 
-    return f"##{ticker} News Reddit, from {before} to {curr_date}:\n\n{news_str}"
+    return f"##{ticker} 新闻Reddit，时间段：{before} 至 {curr_date}：\n\n{news_str}"
 
 
 def get_stock_stats_indicators_window(
@@ -432,79 +431,79 @@ def get_stock_stats_indicators_window(
     best_ind_params = {
         # Moving Averages
         "close_50_sma": (
-            "50 SMA: A medium-term trend indicator. "
-            "Usage: Identify trend direction and serve as dynamic support/resistance. "
-            "Tips: It lags price; combine with faster indicators for timely signals."
+            "50 SMA: 一个中期趋势指标。 "
+            "用途：识别趋势方向和作为动态支撑/阻力。 "
+            "提示：它滞后于价格；与更快的指标结合以获得及时信号。"
         ),
         "close_200_sma": (
-            "200 SMA: A long-term trend benchmark. "
-            "Usage: Confirm overall market trend and identify golden/death cross setups. "
-            "Tips: It reacts slowly; best for strategic trend confirmation rather than frequent trading entries."
+            "200 SMA: 一个长期趋势基准。 "
+            "用途：确认整体市场趋势并识别黄金/死亡交叉设置。 "
+            "提示：它反应缓慢；最好用于战略趋势确认，而不是频繁交易入场。"
         ),
         "close_10_ema": (
-            "10 EMA: A responsive short-term average. "
-            "Usage: Capture quick shifts in momentum and potential entry points. "
-            "Tips: Prone to noise in choppy markets; use alongside longer averages for filtering false signals."
+            "10 EMA: 一个响应式短期平均线。 "
+            "用途：捕捉快速变化的动力并提供潜在入场点。 "
+            "提示：在震荡市场中易受噪音影响；与更长的平均线结合以过滤错误信号。"
         ),
-        # MACD Related
+        # MACD相关
         "macd": (
-            "MACD: Computes momentum via differences of EMAs. "
-            "Usage: Look for crossovers and divergence as signals of trend changes. "
-            "Tips: Confirm with other indicators in low-volatility or sideways markets."
+            "MACD: 通过EMAs的差异计算动量。 "
+            "用途：寻找交叉和背离作为趋势变化的信号。 "
+            "提示：在低波动性或横盘市场中，与其他指标结合使用。"
         ),
         "macds": (
-            "MACD Signal: An EMA smoothing of the MACD line. "
-            "Usage: Use crossovers with the MACD line to trigger trades. "
-            "Tips: Should be part of a broader strategy to avoid false positives."
+            "MACD信号：MACD线的EMA平滑。 "
+            "用途：使用MACD线交叉触发交易。 "
+            "提示：应作为更广泛策略的一部分，以避免错误信号。"
         ),
         "macdh": (
-            "MACD Histogram: Shows the gap between the MACD line and its signal. "
-            "Usage: Visualize momentum strength and spot divergence early. "
-            "Tips: Can be volatile; complement with additional filters in fast-moving markets."
+            "MACD直方图：显示MACD线和其信号之间的差距。 "
+            "用途：可视化动量强度并提前发现背离。 "
+            "提示：在快速移动市场中可能波动；在快速移动市场中应结合其他过滤器。"
         ),
-        # Momentum Indicators
+        # 动量指标
         "rsi": (
-            "RSI: Measures momentum to flag overbought/oversold conditions. "
-            "Usage: Apply 70/30 thresholds and watch for divergence to signal reversals. "
-            "Tips: In strong trends, RSI may remain extreme; always cross-check with trend analysis."
+            "RSI：衡量动量以标记超买/超卖条件。 "
+            "用途：应用70/30阈值并观察背离以指示反转。 "
+            "提示：在强劲趋势中，RSI可能保持极端；始终与趋势分析交叉检查。"
         ),
-        # Volatility Indicators
+        # 波动率指标
         "boll": (
-            "Bollinger Middle: A 20 SMA serving as the basis for Bollinger Bands. "
-            "Usage: Acts as a dynamic benchmark for price movement. "
-            "Tips: Combine with the upper and lower bands to effectively spot breakouts or reversals."
+            "布林中轨：作为布林带基础的20 SMA。 "
+            "用途：作为价格变动的动态基准。 "
+            "提示：结合上轨和下轨以有效发现突破或反转。"
         ),
         "boll_ub": (
-            "Bollinger Upper Band: Typically 2 standard deviations above the middle line. "
-            "Usage: Signals potential overbought conditions and breakout zones. "
-            "Tips: Confirm signals with other tools; prices may ride the band in strong trends."
+            "布林上轨：通常在中间线上方2个标准差。 "
+            "用途：指示潜在超买条件和突破区域。 "
+            "提示：与其他工具结合确认信号；价格可能在强劲趋势中沿轨道运行。"
         ),
         "boll_lb": (
-            "Bollinger Lower Band: Typically 2 standard deviations below the middle line. "
-            "Usage: Indicates potential oversold conditions. "
-            "Tips: Use additional analysis to avoid false reversal signals."
+            "布林下轨：通常在中间线下方2个标准差。 "
+            "用途：指示潜在超卖条件。 "
+            "提示：使用额外的分析以避免错误反转信号。"
         ),
         "atr": (
-            "ATR: Averages true range to measure volatility. "
-            "Usage: Set stop-loss levels and adjust position sizes based on current market volatility. "
-            "Tips: It's a reactive measure, so use it as part of a broader risk management strategy."
+            "ATR：平均真实范围以衡量波动率。 "
+            "用途：设置止损水平并根据当前市场波动性调整持仓规模。 "
+            "提示：它是一个反应性指标，因此应作为更广泛的风险管理策略的一部分。"
         ),
-        # Volume-Based Indicators
+        # 成交量指标
         "vwma": (
-            "VWMA: A moving average weighted by volume. "
-            "Usage: Confirm trends by integrating price action with volume data. "
-            "Tips: Watch for skewed results from volume spikes; use in combination with other volume analyses."
+            "VWMA：成交量加权移动平均线。 "
+            "用途：通过整合价格走势与成交量数据确认趋势。 "
+            "提示：注意成交量峰值导致的偏斜结果；在与其他成交量分析结合使用时。"
         ),
         "mfi": (
-            "MFI: The Money Flow Index is a momentum indicator that uses both price and volume to measure buying and selling pressure. "
-            "Usage: Identify overbought (>80) or oversold (<20) conditions and confirm the strength of trends or reversals. "
-            "Tips: Use alongside RSI or MACD to confirm signals; divergence between price and MFI can indicate potential reversals."
+            "MFI：资金流量指数，它同时使用价格和成交量来衡量买入和卖出压力。 "
+            "用途：识别超买（>80）或超卖（<20）条件并确认趋势或反转的强度。 "
+            "提示：与RSI或MACD结合确认信号；价格和MFI之间的背离可能表明潜在反转。"
         ),
     }
 
     if indicator not in best_ind_params:
         raise ValueError(
-            f"Indicator {indicator} is not supported. Please choose from: {list(best_ind_params.keys())}"
+            f"指标 {indicator} 不受支持。请从以下选项中选择：{list(best_ind_params.keys())}"
         )
 
     end_date = curr_date
@@ -546,10 +545,10 @@ def get_stock_stats_indicators_window(
             curr_date = curr_date - relativedelta(days=1)
 
     result_str = (
-        f"## {indicator} values from {before.strftime('%Y-%m-%d')} to {end_date}:\n\n"
+        f"## {indicator} 值，时间段：{before.strftime('%Y-%m-%d')} 至 {end_date}：\n\n"
         + ind_string
         + "\n\n"
-        + best_ind_params.get(indicator, "No description available.")
+        + best_ind_params.get(indicator, "无描述信息。")
     )
 
     return result_str
@@ -620,7 +619,7 @@ def get_YFin_data_window(
         df_string = filtered_data.to_string()
 
     return (
-        f"## Raw Market Data for {symbol} from {start_date} to {curr_date}:\n\n"
+        f"## 原始市场数据，{symbol}，时间段：{start_date} 至 {curr_date}：\n\n"
         + df_string
     )
 
@@ -643,7 +642,7 @@ def get_YFin_data_online(
     # Check if data is empty
     if data.empty:
         return (
-            f"No data found for symbol '{symbol}' between {start_date} and {end_date}"
+            f"未找到符号 '{symbol}' 在 {start_date} 和 {end_date} 之间的数据"
         )
 
     # Remove timezone info from index for cleaner output
@@ -660,9 +659,9 @@ def get_YFin_data_online(
     csv_string = data.to_csv()
 
     # Add header information
-    header = f"# Stock data for {symbol.upper()} from {start_date} to {end_date}\n"
-    header += f"# Total records: {len(data)}\n"
-    header += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    header = f"# 股票数据，{symbol.upper()}，时间段：{start_date} 至 {end_date}\n"
+    header += f"# 总记录数：{len(data)}\n"
+    header += f"# 数据获取时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
 
     return header + csv_string
 
@@ -682,7 +681,7 @@ def get_YFin_data(
 
     if end_date > "2025-03-25":
         raise Exception(
-            f"Get_YFin_Data: {end_date} is outside of the data range of 2015-01-01 to 2025-03-25"
+            f"Get_YFin_Data: {end_date} 超出数据范围 2015-01-01 至 2025-03-25"
         )
 
     # Extract just the date part for comparison
@@ -704,7 +703,10 @@ def get_YFin_data(
 
 def get_stock_news_openai(ticker, curr_date):
     config = get_config()
-    client = OpenAI(base_url=config["backend_url"])
+    if "dashscope" in config["backend_url"]:
+        client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("DASHSCOPE_API_KEY"))
+    else:
+        client = OpenAI(base_url=config["backend_url"])
 
     response = client.responses.create(
         model=config["quick_think_llm"],
@@ -739,7 +741,10 @@ def get_stock_news_openai(ticker, curr_date):
 
 def get_global_news_openai(curr_date):
     config = get_config()
-    client = OpenAI(base_url=config["backend_url"])
+    if "dashscope" in config["backend_url"]:
+        client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("DASHSCOPE_API_KEY"))
+    else:
+        client = OpenAI(base_url=config["backend_url"])
 
     response = client.responses.create(
         model=config["quick_think_llm"],
@@ -774,7 +779,10 @@ def get_global_news_openai(curr_date):
 
 def get_fundamentals_openai(ticker, curr_date):
     config = get_config()
-    client = OpenAI(base_url=config["backend_url"])
+    if "dashscope" in config["backend_url"]:
+        client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("DASHSCOPE_API_KEY"))
+    else:
+        client = OpenAI(base_url=config["backend_url"])
 
     response = client.responses.create(
         model=config["quick_think_llm"],

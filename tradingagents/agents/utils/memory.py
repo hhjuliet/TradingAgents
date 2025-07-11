@@ -1,3 +1,5 @@
+import os
+
 import chromadb
 from chromadb.config import Settings
 from openai import OpenAI
@@ -7,23 +9,31 @@ class FinancialSituationMemory:
     def __init__(self, name, config):
         if config["backend_url"] == "http://localhost:11434/v1":
             self.embedding = "nomic-embed-text"
+        elif config["backend_url"] == "https://dashscope.aliyuncs.com/compatible-mode/v1":
+            self.embedding = "text-embedding-v3"
         else:
             self.embedding = "text-embedding-3-small"
-        self.client = OpenAI(base_url=config["backend_url"])
+
+        if config["backend_url"] == "https://dashscope.aliyuncs.com/compatible-mode/v1":
+            self.client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("DASHSCOPE_API_KEY"))
+        else:
+            self.client = OpenAI(base_url=config["backend_url"])
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 
     def get_embedding(self, text):
-        """Get OpenAI embedding for a text"""
-        
+        """
+        获取文本的OpenAI向量。
+        """
         response = self.client.embeddings.create(
             model=self.embedding, input=text
         )
         return response.data[0].embedding
 
     def add_situations(self, situations_and_advice):
-        """Add financial situations and their corresponding advice. Parameter is a list of tuples (situation, rec)"""
-
+        """
+        添加金融情境及其建议。参数为(situation, rec)元组列表。
+        """
         situations = []
         advice = []
         ids = []

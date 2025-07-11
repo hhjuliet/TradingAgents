@@ -51,14 +51,14 @@ ticker_to_company = {
 
 def fetch_top_from_category(
     category: Annotated[
-        str, "Category to fetch top post from. Collection of subreddits."
+        str, "要获取的类别。子版块集合。"
     ],
-    date: Annotated[str, "Date to fetch top posts from."],
-    max_limit: Annotated[int, "Maximum number of posts to fetch."],
-    query: Annotated[str, "Optional query to search for in the subreddit."] = None,
+    date: Annotated[str, "要获取的日期。"],
+    max_limit: Annotated[int, "要获取的最大帖子数。"],
+    query: Annotated[str, "可选查询关键词，用于子版块搜索。"] = None,
     data_path: Annotated[
         str,
-        "Path to the data folder. Default is 'reddit_data'.",
+        "数据文件夹路径，默认为'reddit_data'。",
     ] = "reddit_data",
 ):
     base_path = data_path
@@ -67,7 +67,7 @@ def fetch_top_from_category(
 
     if max_limit < len(os.listdir(os.path.join(base_path, category))):
         raise ValueError(
-            "REDDIT FETCHING ERROR: max limit is less than the number of files in the category. Will not be able to fetch any posts"
+            "REDDIT 抓取错误：max limit 小于该类别文件数，无法抓取任何帖子"
         )
 
     limit_per_subreddit = max_limit // len(
@@ -75,7 +75,7 @@ def fetch_top_from_category(
     )
 
     for data_file in os.listdir(os.path.join(base_path, category)):
-        # check if data_file is a .jsonl file
+        # 检查是否为.jsonl文件
         if not data_file.endswith(".jsonl"):
             continue
 
@@ -83,20 +83,20 @@ def fetch_top_from_category(
 
         with open(os.path.join(base_path, category, data_file), "rb") as f:
             for i, line in enumerate(f):
-                # skip empty lines
+                # 跳过空行
                 if not line.strip():
                     continue
 
                 parsed_line = json.loads(line)
 
-                # select only lines that are from the date
+                # 只选择指定日期的内容
                 post_date = datetime.utcfromtimestamp(
                     parsed_line["created_utc"]
                 ).strftime("%Y-%m-%d")
                 if post_date != date:
                     continue
 
-                # if is company_news, check that the title or the content has the company's name (query) mentioned
+                # 如果是company_news，检查标题或内容是否包含公司名（query）
                 if "company" in category and query:
                     search_terms = []
                     if "OR" in ticker_to_company[query]:
@@ -127,7 +127,7 @@ def fetch_top_from_category(
 
                 all_content_curr_subreddit.append(post)
 
-        # sort all_content_curr_subreddit by upvote_ratio in descending order
+        # 按upvotes降序排序
         all_content_curr_subreddit.sort(key=lambda x: x["upvotes"], reverse=True)
 
         all_content.extend(all_content_curr_subreddit[:limit_per_subreddit])

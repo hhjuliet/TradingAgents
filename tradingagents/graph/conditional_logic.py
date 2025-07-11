@@ -4,15 +4,15 @@ from tradingagents.agents.utils.agent_states import AgentState
 
 
 class ConditionalLogic:
-    """Handles conditional logic for determining graph flow."""
+    """处理用于确定图流程的条件逻辑。"""
 
     def __init__(self, max_debate_rounds=1, max_risk_discuss_rounds=1):
-        """Initialize with configuration parameters."""
+        """用配置参数初始化。"""
         self.max_debate_rounds = max_debate_rounds
         self.max_risk_discuss_rounds = max_risk_discuss_rounds
 
     def should_continue_market(self, state: AgentState):
-        """Determine if market analysis should continue."""
+        """判断是否继续市场分析。"""
         messages = state["messages"]
         last_message = messages[-1]
         if last_message.tool_calls:
@@ -20,7 +20,7 @@ class ConditionalLogic:
         return "Msg Clear Market"
 
     def should_continue_social(self, state: AgentState):
-        """Determine if social media analysis should continue."""
+        """判断是否继续社交媒体分析。"""
         messages = state["messages"]
         last_message = messages[-1]
         if last_message.tool_calls:
@@ -28,7 +28,7 @@ class ConditionalLogic:
         return "Msg Clear Social"
 
     def should_continue_news(self, state: AgentState):
-        """Determine if news analysis should continue."""
+        """判断是否继续新闻分析。"""
         messages = state["messages"]
         last_message = messages[-1]
         if last_message.tool_calls:
@@ -36,7 +36,7 @@ class ConditionalLogic:
         return "Msg Clear News"
 
     def should_continue_fundamentals(self, state: AgentState):
-        """Determine if fundamentals analysis should continue."""
+        """判断是否继续基本面分析。"""
         messages = state["messages"]
         last_message = messages[-1]
         if last_message.tool_calls:
@@ -48,7 +48,7 @@ class ConditionalLogic:
 
         if (
             state["investment_debate_state"]["count"] >= 2 * self.max_debate_rounds
-        ):  # 3 rounds of back-and-forth between 2 agents
+        ):
             return "Research Manager"
         if state["investment_debate_state"]["current_response"].startswith("Bull"):
             return "Bear Researcher"
@@ -58,7 +58,7 @@ class ConditionalLogic:
         """Determine if risk analysis should continue."""
         if (
             state["risk_debate_state"]["count"] >= 3 * self.max_risk_discuss_rounds
-        ):  # 3 rounds of back-and-forth between 3 agents
+        ):
             return "Risk Judge"
         if state["risk_debate_state"]["latest_speaker"].startswith("Risky"):
             return "Safe Analyst"
