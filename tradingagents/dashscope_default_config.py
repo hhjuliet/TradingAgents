@@ -10,8 +10,8 @@ DEFAULT_CONFIG = {
     ),
     # LLM settings
     "llm_provider": "dashscope",
-    "deep_think_llm": "qwen-plus",
-    "quick_think_llm": "qwen-plus",
+    "deep_think_llm": "qwen-plus-latest",
+    "quick_think_llm": "qwen-plus-latest",
     "backend_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     # Debate and discussion settings
     "max_debate_rounds": 1,

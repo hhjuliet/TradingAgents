@@ -16,7 +16,7 @@ if __name__ == '__main__':
     ta = TradingAgentsGraph(debug=True, config=config)
 
     # forward propagate
-    _, decision = ta.propagate("NVDA", "2025-07-10")
+    _, decision = ta.propagate("PYPL", "2025-07-11")
     print(decision)
 
     # Memorize mistakes and reflect

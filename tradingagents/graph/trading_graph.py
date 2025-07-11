@@ -36,8 +36,7 @@ class TradingAgentsGraph:
 
     def __init__(
         self,
-        # selected_analysts=["market", "social", "news", "fundamentals"],
-        selected_analysts=["market", "news", "fundamentals"],
+        selected_analysts=["market", "social", "news", "fundamentals"],
         debug=False,
         config: Dict[str, Any] = None,
     ):
@@ -128,48 +127,44 @@ class TradingAgentsGraph:
 
     def _create_tool_nodes(self) -> Dict[str, ToolNode]:
         """为不同数据源创建工具节点。"""
-        return {
-            "market": ToolNode(
-                [
-                    # 在线工具
-                    self.toolkit.get_YFin_data_online,
-                    self.toolkit.get_stockstats_indicators_report_online,
-                    # 离线工具
-                    self.toolkit.get_YFin_data,
-                    self.toolkit.get_stockstats_indicators_report,
-                ]
-            ),
-            "social": ToolNode(
-                [
-                    # 在线工具
-                    self.toolkit.get_stock_news_openai,
-                    # 离线工具
-                    self.toolkit.get_reddit_stock_info,
-                ]
-            ),
-            "news": ToolNode(
-                [
-                    # 在线工具
-                    self.toolkit.get_global_news_openai,
-                    self.toolkit.get_google_news,
-                    # 离线工具
-                    self.toolkit.get_finnhub_news,
-                    self.toolkit.get_reddit_news,
-                ]
-            ),
-            "fundamentals": ToolNode(
-                [
-                    # 在线工具
-                    self.toolkit.get_fundamentals_openai,
-                    # 离线工具
-                    self.toolkit.get_finnhub_company_insider_sentiment,
-                    self.toolkit.get_finnhub_company_insider_transactions,
-                    self.toolkit.get_simfin_balance_sheet,
-                    self.toolkit.get_simfin_cashflow,
-                    self.toolkit.get_simfin_income_stmt,
-                ]
-            ),
-        }
+        online = self.toolkit.config.get("online_tools", False)
+        tool_nodes = {}
+        if online:
+            tool_nodes["market"] = ToolNode([
+                self.toolkit.get_YFin_data_online,
+                self.toolkit.get_stockstats_indicators_report_online,
+            ])
+            tool_nodes["social"] = ToolNode([
+                self.toolkit.get_stock_news_openai,
+            ])
+            tool_nodes["news"] = ToolNode([
+                self.toolkit.get_finnhub_news,
+            ])
+            tool_nodes["fundamentals"] = ToolNode([
+                self.toolkit.get_finnhub_company_insider_sentiment,
+                self.toolkit.get_finnhub_company_insider_transactions,
+            ])
+        else:
+            tool_nodes["market"] = ToolNode([
+                self.toolkit.get_YFin_data,
+                self.toolkit.get_stockstats_indicators_report,
+            ])
+            tool_nodes["social"] = ToolNode([
+                self.toolkit.get_reddit_stock_info,
+            ])
+            tool_nodes["news"] = ToolNode([
+                self.toolkit.get_finnhub_news,
+                self.toolkit.get_reddit_news,
+                self.toolkit.get_google_news,
+            ])
+            tool_nodes["fundamentals"] = ToolNode([
+                self.toolkit.get_finnhub_company_insider_sentiment,
+                self.toolkit.get_finnhub_company_insider_transactions,
+                self.toolkit.get_simfin_balance_sheet,
+                self.toolkit.get_simfin_cashflow,
+                self.toolkit.get_simfin_income_stmt,
+            ])
+        return tool_nodes
 
     def propagate(self, company_name, trade_date):
         """对指定公司和日期运行交易智能体图。"""
