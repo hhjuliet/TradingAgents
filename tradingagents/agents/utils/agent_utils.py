@@ -144,24 +144,71 @@ class Toolkit:
 
     @staticmethod
     @tool
-    def get_YFin_data_online(
-        symbol: Annotated[str, "公司股票代码"],
+    def get_stock_data_online(
+        symbol: Annotated[str, "股票代码（支持A股、港股、美股），如AAPL、600519.SS、00700.HK"],
         start_date: Annotated[str, "开始日期，格式为yyyy-mm-dd"],
         end_date: Annotated[str, "结束日期，格式为yyyy-mm-dd"],
     ) -> str:
         """
-        从Yahoo Finance获取给定股票代码的股价数据。
+        通用股票数据查询工具，支持A股、港股、美股。
         Args:
-            symbol (str): 公司股票代码，例如AAPL, TSM
+            symbol (str): 股票代码（如AAPL、600519.SS、00700.HK）
             start_date (str): 开始日期，格式为yyyy-mm-dd
             end_date (str): 结束日期，格式为yyyy-mm-dd
         Returns:
-            str: 包含指定股票代码在指定日期范围内的股价数据的格式化数据框。
+            str: 指定股票在指定日期范围内的行情数据（CSV字符串）。
         """
-
-        result_data = interface.get_YFin_data_online(symbol, start_date, end_date)
-
-        return result_data
+        import re
+        try:
+            # A股：6位纯数字
+            if re.fullmatch(r"\d{6}", symbol):
+                try:
+                    import akshare as ak
+                except ImportError:
+                    return "未安装akshare库，无法查询A股行情。请先 pip install akshare"
+                stock_df = ak.stock_zh_a_hist(symbol=symbol, start_date=start_date.replace("-", ""), end_date=end_date.replace("-", ""), adjust="qfq")
+                if stock_df.empty:
+                    return f"未找到A股 {symbol} 在 {start_date} 和 {end_date} 之间的数据"
+                stock_df = stock_df.rename(columns={"日期": "Date", "开盘": "Open", "收盘": "Close", "最高": "High", "最低": "Low", "成交量": "Volume"})
+                csv_string = stock_df.to_csv(index=False)
+                header = f"# 股票数据，{symbol}（A股），时间段：{start_date} 至 {end_date}\n# 总记录数：{len(stock_df)}\n# 数据获取时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                return header + csv_string
+            # 港股：5位数字，或0开头5位数字
+            elif re.fullmatch(r"0?\d{5}", symbol):
+                try:
+                    import akshare as ak
+                except ImportError:
+                    return "未安装akshare库，无法查询港股行情。请先 pip install akshare"
+                stock_df = ak.stock_hk_daily(symbol=symbol)
+                # akshare港股接口返回全量，需按日期过滤
+                stock_df = stock_df[(stock_df['date'] >= start_date) & (stock_df['date'] <= end_date)]
+                if stock_df.empty:
+                    return f"未找到港股 {symbol} 在 {start_date} 和 {end_date} 之间的数据"
+                stock_df = stock_df.rename(columns={"date": "Date", "open": "Open", "close": "Close", "high": "High", "low": "Low", "volume": "Volume"})
+                csv_string = stock_df.to_csv(index=False)
+                header = f"# 股票数据，{symbol}（港股），时间段：{start_date} 至 {end_date}\n# 总记录数：{len(stock_df)}\n# 数据获取时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                return header + csv_string
+            # 美股/其它
+            else:
+                try:
+                    import yfinance as yf
+                except ImportError:
+                    return "未安装yfinance库，无法查询美股行情。请先 pip install yfinance"
+                ticker = yf.Ticker(symbol)
+                data = ticker.history(start=start_date, end=end_date)
+                if data.empty:
+                    return f"未找到美股 {symbol} 在 {start_date} 和 {end_date} 之间的数据"
+                if data.index.tz is not None:
+                    data.index = data.index.tz_localize(None)
+                numeric_columns = ["Open", "High", "Low", "Close", "Adj Close"]
+                for col in numeric_columns:
+                    if col in data.columns:
+                        data[col] = data[col].round(2)
+                csv_string = data.to_csv()
+                header = f"# 股票数据，{symbol}（美股/国际），时间段：{start_date} 至 {end_date}\n# 总记录数：{len(data)}\n# 数据获取时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                return header + csv_string
+        except Exception as e:
+            return f"查询股票数据时发生错误: {e}"
 
     @staticmethod
     @tool
@@ -384,38 +431,113 @@ class Toolkit:
 
     @staticmethod
     @tool
-    def get_global_news_openai(
+    def get_news_info_online(
+        symbol: Annotated[str, "股票代码（支持A股、港股、美股），如AAPL、600519、00700"],
         curr_date: Annotated[str, "当前日期，格式为yyyy-mm-dd"],
-    ):
+        look_back_days: Annotated[int, "回溯天数，默认7天"] = 7,
+    ) -> str:
         """
-        使用OpenAI的宏观经济新闻API获取给定日期的最新宏观经济新闻。
+        通用公司新闻资讯查询工具，支持A股、港股、美股。
         Args:
+            symbol (str): 股票代码（如AAPL、600519、00700）
             curr_date (str): 当前日期，格式为yyyy-mm-dd
+            look_back_days (int): 回溯天数，默认7天
         Returns:
-            str: 包含给定日期最新宏观经济新闻的字符串。
+            str: 公司相关新闻资讯。
         """
-
-        openai_news_results = interface.get_global_news_openai(curr_date)
-
-        return openai_news_results
+        import re
+        try:
+            if re.fullmatch(r"\d{6}", symbol):  # A股
+                try:
+                    import akshare as ak
+                except ImportError:
+                    return "未安装akshare库，无法查询A股新闻。请先 pip install akshare"
+                df = ak.stock_news_em(symbol=symbol)
+                if df.empty:
+                    return f"未找到A股 {symbol} 的相关新闻"
+                df = df[df['datetime'] >= (datetime.strptime(curr_date, "%Y-%m-%d") - timedelta(days=look_back_days)).strftime("%Y-%m-%d")]
+                news_str = "\n".join([f"{row['datetime']} | {row['title']}\n{row['content']}" for _, row in df.iterrows()])
+                return f"# {symbol}（A股）新闻资讯（近{look_back_days}天）\n" + news_str
+            elif re.fullmatch(r"0?\d{5}", symbol):  # 港股
+                try:
+                    import akshare as ak
+                except ImportError:
+                    return "未安装akshare库，无法查询港股新闻。请先 pip install akshare"
+                df = ak.stock_hk_news_em(symbol=symbol)
+                if df.empty:
+                    return f"未找到港股 {symbol} 的相关新闻"
+                df = df[df['datetime'] >= (datetime.strptime(curr_date, "%Y-%m-%d") - timedelta(days=look_back_days)).strftime("%Y-%m-%d")]
+                news_str = "\n".join([f"{row['datetime']} | {row['title']}\n{row['content']}" for _, row in df.iterrows()])
+                return f"# {symbol}（港股）新闻资讯（近{look_back_days}天）\n" + news_str
+            else:  # 美股/其它
+                try:
+                    import yfinance as yf
+                except ImportError:
+                    return "未安装yfinance库，无法查询美股新闻。请先 pip install yfinance"
+                ticker = yf.Ticker(symbol)
+                news = ticker.news if hasattr(ticker, 'news') else []
+                if not news:
+                    # 兜底用Google News
+                    from tradingagents.dataflows.interface import get_google_news
+                    news_str = get_google_news(symbol, curr_date, look_back_days)
+                    return f"# {symbol}（美股/国际）新闻资讯（近{look_back_days}天）\n" + news_str
+                news_str = "\n".join([f"{item.get('providerPublishTime', '')} | {item.get('title', '')}\n{item.get('link', '')}" for item in news if 'title' in item])
+                return f"# {symbol}（美股/国际）新闻资讯（近{look_back_days}天）\n" + news_str
+        except Exception as e:
+            return f"查询新闻资讯时发生错误: {e}"
 
     @staticmethod
     @tool
-    def get_fundamentals_openai(
-        ticker: Annotated[str, "公司股票代码"],
+    def get_fundamentals_info_online(
+        symbol: Annotated[str, "股票代码（支持A股、港股、美股），如AAPL、600519、00700"],
         curr_date: Annotated[str, "当前日期，格式为yyyy-mm-dd"],
-    ):
+    ) -> str:
         """
-        使用OpenAI的新闻API获取给定股票在给定日期的最新基本面信息。
+        通用公司资讯查询工具，支持A股、港股、美股。
         Args:
-            ticker (str): 公司股票代码。例如AAPL, TSM
+            symbol (str): 股票代码（如AAPL、600519、00700）
             curr_date (str): 当前日期，格式为yyyy-mm-dd
         Returns:
-            str: 包含给定日期公司最新基本面信息的字符串。
+            str: 公司简介、主营、行业、官网等资讯。
         """
-
-        openai_fundamentals_results = interface.get_fundamentals_openai(
-            ticker, curr_date
-        )
-
-        return openai_fundamentals_results
+        import re
+        try:
+            if re.fullmatch(r"\d{6}", symbol):  # A股
+                try:
+                    import akshare as ak
+                except ImportError:
+                    return "未安装akshare库，无法查询A股公司资讯。请先 pip install akshare"
+                try:
+                    df = ak.stock_zh_a_profile(symbol=symbol)
+                    if df.empty:
+                        raise ValueError("empty")
+                    info = df.iloc[0].to_dict()
+                    return f"# {symbol}（A股）公司资讯\n公司名称: {info.get('公司名称', '')}\n主营业务: {info.get('主营业务', '')}\n所属行业: {info.get('所属行业', '')}\n公司网址: {info.get('公司网址', '')}\n上市日期: {info.get('上市日期', '')}\n"
+                except Exception:
+                    # 降级用spot接口
+                    df_spot = ak.stock_zh_a_spot_em()
+                    row = df_spot[df_spot['代码'] == symbol]
+                    if row.empty:
+                        return f"未找到A股 {symbol} 的公司资讯"
+                    info = row.iloc[0].to_dict()
+                    return f"# {symbol}（A股）公司资讯\n公司名称: {info.get('名称', '')}\n所属行业: {info.get('行业', '')}\n最新价: {info.get('最新价', '')}\n市盈率: {info.get('市盈率', '')}\n"
+            elif re.fullmatch(r"0?\d{5}", symbol):  # 港股
+                try:
+                    import akshare as ak
+                except ImportError:
+                    return "未安装akshare库，无法查询港股公司资讯。请先 pip install akshare"
+                df = ak.stock_hk_company_profile_em(symbol=symbol)
+                if df.empty:
+                    return f"未找到港股 {symbol} 的公司资讯"
+                info = df.iloc[0].to_dict()
+                return f"# {symbol}（港股）公司资讯\n公司名称: {info.get('证券简称', '')}\n主营业务: {info.get('主营业务', '')}\n所属行业: {info.get('所属行业', '')}\n公司网址: {info.get('公司网址', '')}\n上市日期: {info.get('上市日期', '')}\n"
+            else:  # 美股/其它
+                try:
+                    import yfinance as yf
+                except ImportError:
+                    return "未安装yfinance库，无法查询美股公司资讯。请先 pip install yfinance"
+                ticker = yf.Ticker(symbol)
+                info = ticker.info
+                return f"# {symbol}（美股/国际）公司资讯\n公司名称: {info.get('shortName', '')}\n主营业务: {info.get('longBusinessSummary', '')}\n所属行业: {info.get('industry', '')}\n公司网址: {info.get('website', '')}\n上市日期: {info.get('ipoDate', '') if 'ipoDate' in info else ''}\n"
+        except Exception as e:
+            return f"查询公司资讯时发生错误: {e}"

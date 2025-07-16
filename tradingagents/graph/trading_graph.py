@@ -12,7 +12,7 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from langgraph.prebuilt import ToolNode
+from langgraph.prebuilt.tool_node import ToolNode
 
 from tradingagents.agents import *
 from tradingagents.arkengine_default_config import DEFAULT_CONFIG
@@ -92,7 +92,7 @@ class TradingAgentsGraph:
             )
             self.quick_thinking_llm = ChatOpenAI(
                 model=self.config["quick_think_llm"],
-                base_url="https://ark.cn-beijing.volces.com/api/v3",
+                base_url="https://ark.cn-beijing.volces.com/api/v3/bots",
                 openai_api_key=os.getenv("ARK_API_KEY")  # 必须在环境变量中设置
             )
         else:
@@ -143,14 +143,14 @@ class TradingAgentsGraph:
         tool_nodes = {}
         if online:
             tool_nodes["market"] = ToolNode([
-                self.toolkit.get_YFin_data_online,
+                self.toolkit.get_stock_data_online,
                 self.toolkit.get_stockstats_indicators_report_online,
             ])
             tool_nodes["social"] = ToolNode([
                 self.toolkit.get_stock_news_openai,
             ])
             tool_nodes["news"] = ToolNode([
-                self.toolkit.get_finnhub_news,
+                self.toolkit.get_news_info_online,
             ])
             tool_nodes["fundamentals"] = ToolNode([
                 self.toolkit.get_finnhub_company_insider_sentiment,

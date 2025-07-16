@@ -1,9 +1,12 @@
+from dotenv import load_dotenv
+
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.arkengine_default_config import DEFAULT_CONFIG
 
 
 if __name__ == '__main__':
     # Create a custom config
+    load_dotenv()
     config = DEFAULT_CONFIG.copy()
     # config["llm_provider"] = "google"  # Use a different model
     # config["backend_url"] = "https://generativelanguage.googleapis.com/v1"  # Use a different backend
@@ -16,7 +19,7 @@ if __name__ == '__main__':
     ta = TradingAgentsGraph(debug=True, config=config)
 
     # forward propagate
-    _, decision = ta.propagate("BABA", "2025-07-15")
+    _, decision = ta.propagate("BABA", "2025-07-16")
     print(decision)
 
     # Memorize mistakes and reflect

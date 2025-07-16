@@ -11,14 +11,14 @@ class FinancialSituationMemory:
             self.embedding = "nomic-embed-text"
         elif config["backend_url"] == "https://dashscope.aliyuncs.com/compatible-mode/v1":
             self.embedding = "text-embedding-v4"
-        elif config["backend_url"] == "https://ark.cn-beijing.volces.com/api/v3":
+        elif config["backend_url"] == "https://ark.cn-beijing.volces.com/api/v3/bots":
             self.embedding = "doubao-embedding-large-text-250515"
         else:
             self.embedding = "text-embedding-3-small"
 
         if config["backend_url"] == "https://dashscope.aliyuncs.com/compatible-mode/v1":
             self.client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("DASHSCOPE_API_KEY"))
-        elif config["backend_url"] == "https://ark.cn-beijing.volces.com/api/v3":
+        elif config["backend_url"] == "https://ark.cn-beijing.volces.com/api/v3/bots":
             self.client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("ARK_API_KEY"))
         else:
             self.client = OpenAI(base_url=config["backend_url"])

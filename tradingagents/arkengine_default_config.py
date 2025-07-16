@@ -11,8 +11,8 @@ DEFAULT_CONFIG = {
     # LLM settings
     "llm_provider": "ark",
     "deep_think_llm": "bot-20250710222426-r8s6b",
-    "quick_think_llm": "ep-20250710215336-85fgz",
-    "backend_url": "https://ark.cn-beijing.volces.com/api/v3",
+    "quick_think_llm": "bot-20250716202033-tvqrq",
+    "backend_url": "https://ark.cn-beijing.volces.com/api/v3/bots",
     # Debate and discussion settings
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,
