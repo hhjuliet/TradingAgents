@@ -705,6 +705,8 @@ def get_stock_news_openai(ticker, curr_date):
     config = get_config()
     if "dashscope" in config["backend_url"]:
         client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("DASHSCOPE_API_KEY"))
+    elif "ark" in config["backend_url"]:
+        client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("ARK_API_KEY"))
     else:
         client = OpenAI(base_url=config["backend_url"])
 
@@ -743,6 +745,8 @@ def get_global_news_openai(curr_date):
     config = get_config()
     if "dashscope" in config["backend_url"]:
         client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("DASHSCOPE_API_KEY"))
+    elif "ark" in config["backend_url"]:
+        client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("ARK_API_KEY"))
     else:
         client = OpenAI(base_url=config["backend_url"])
 
@@ -781,6 +785,8 @@ def get_fundamentals_openai(ticker, curr_date):
     config = get_config()
     if "dashscope" in config["backend_url"]:
         client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("DASHSCOPE_API_KEY"))
+    elif "ark" in config["backend_url"]:
+        client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("ARK_API_KEY"))
     else:
         client = OpenAI(base_url=config["backend_url"])
 

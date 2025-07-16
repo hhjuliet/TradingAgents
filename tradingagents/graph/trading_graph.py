@@ -15,7 +15,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import ToolNode
 
 from tradingagents.agents import *
-from tradingagents.dashscope_default_config import DEFAULT_CONFIG
+from tradingagents.arkengine_default_config import DEFAULT_CONFIG
 from tradingagents.agents.utils.memory import FinancialSituationMemory
 from tradingagents.agents.utils.agent_states import (
     AgentState,
@@ -37,6 +37,7 @@ class TradingAgentsGraph:
     def __init__(
         self,
         selected_analysts=["market", "social", "news", "fundamentals"],
+            # selected_analysts=["market", "news"],
         debug=False,
         config: Dict[str, Any] = None,
     ):
@@ -82,6 +83,17 @@ class TradingAgentsGraph:
                 model=self.config["quick_think_llm"],
                 base_url=dashscope_base_url,
                 openai_api_key=os.getenv("DASHSCOPE_API_KEY")  # 必须在环境变量中设置
+            )
+        elif self.config["llm_provider"].lower() == "ark":
+            self.deep_thinking_llm = ChatOpenAI(
+                model=self.config["deep_think_llm"],
+                base_url="https://ark.cn-beijing.volces.com/api/v3/bots",
+                openai_api_key=os.getenv("ARK_API_KEY")  # 必须在环境变量中设置
+            )
+            self.quick_thinking_llm = ChatOpenAI(
+                model=self.config["quick_think_llm"],
+                base_url="https://ark.cn-beijing.volces.com/api/v3",
+                openai_api_key=os.getenv("ARK_API_KEY")  # 必须在环境变量中设置
             )
         else:
             raise ValueError(f"不支持的LLM提供商: {self.config['llm_provider']}")
@@ -239,9 +251,9 @@ class TradingAgentsGraph:
 
         with open(
             f"eval_results/{self.ticker}/TradingAgentsStrategy_logs/full_states_log.json",
-            "w",
+            "w", encoding="utf-8"
         ) as f:
-            json.dump(self.log_states_dict, f, indent=4)
+            json.dump(self.log_states_dict, f, indent=4, ensure_ascii=False)
 
     def reflect_and_remember(self, returns_losses):
         """根据收益反思决策并更新记忆。"""
@@ -271,5 +283,9 @@ if __name__ == '__main__':
         test_response = tg.quick_thinking_llm.invoke([HumanMessage(content="Ping")]).content
         print(test_response)
         assert "Pong" in test_response  # 连接检查
+
+        # test_response = tg.deep_thinking_llm.invoke([HumanMessage(content="Ping")]).content
+        # print(test_response)
+        # assert "Pong" in test_response  # 连接检查
     except Exception as e:
         raise ConnectionError(f"API错误: {str(e)}")

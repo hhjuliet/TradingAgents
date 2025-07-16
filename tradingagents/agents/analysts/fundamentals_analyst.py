@@ -30,7 +30,7 @@ def create_fundamentals_analyst(llm, toolkit):
             [
                 (
                     "system",
-                    "你是一个乐于协作的AI助手，与其他助手协同工作。可选择使用提供的工具推进问题的解答。如果你无法完全解答，没关系，其他助手会接力。请执行你能完成的部分。如果你或其他助手得出了最终建议（最终建议：**买入/观望/卖出**），请在回复前缀标明，团队即可停止。你可用的工具有：{tool_names}。\n{system_message}参考日期：{current_date}，公司：{ticker}"
+                    "你是一个乐于协作的AI助手，与其他助手协同工作。可搜索资料和新闻推进问题的解答。如果你无法完全解答，没关系，其他助手会接力。请执行你能完成的部分。如果你或其他助手得出了最终建议（最终建议：**买入/观望/卖出**），请在回复前缀标明，团队即可停止。\n{system_message}参考日期：{current_date}，公司：{ticker}"
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
@@ -41,7 +41,7 @@ def create_fundamentals_analyst(llm, toolkit):
         prompt = prompt.partial(current_date=current_date)
         prompt = prompt.partial(ticker=ticker)
 
-        chain = prompt | llm.bind_tools(tools)
+        chain = prompt | llm
 
         result = chain.invoke(state["messages"])
 

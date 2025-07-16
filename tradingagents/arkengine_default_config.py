@@ -9,10 +9,10 @@ DEFAULT_CONFIG = {
         "dataflows/data_cache",
     ),
     # LLM settings
-    "llm_provider": "dashscope",
-    "deep_think_llm": "qwen-plus-2025-04-28",
-    "quick_think_llm": "qwen-plus-2025-04-28",
-    "backend_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "llm_provider": "ark",
+    "deep_think_llm": "bot-20250710222426-r8s6b",
+    "quick_think_llm": "ep-20250710215336-85fgz",
+    "backend_url": "https://ark.cn-beijing.volces.com/api/v3",
     # Debate and discussion settings
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,

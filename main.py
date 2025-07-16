@@ -1,5 +1,5 @@
 from tradingagents.graph.trading_graph import TradingAgentsGraph
-from tradingagents.dashscope_default_config import DEFAULT_CONFIG
+from tradingagents.arkengine_default_config import DEFAULT_CONFIG
 
 
 if __name__ == '__main__':
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     ta = TradingAgentsGraph(debug=True, config=config)
 
     # forward propagate
-    _, decision = ta.propagate("PYPL", "2025-07-11")
+    _, decision = ta.propagate("BABA", "2025-07-15")
     print(decision)
 
     # Memorize mistakes and reflect
